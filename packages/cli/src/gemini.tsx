@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { render } from 'ink';
 import { AppContainer } from './ui/AppContainer.js';
 import { loadCliConfig, parseArguments } from './config/config.js';
@@ -212,10 +213,19 @@ export async function startInteractiveUI(
     );
   };
 
-  const instance = render(<AppWrapper />, {
-    exitOnCtrlC: false,
-    isScreenReaderEnabled: config.getScreenReader(),
-  });
+  const instance = render(
+    process.env['DEBUG'] ? (
+      <React.StrictMode>
+        <AppWrapper />
+      </React.StrictMode>
+    ) : (
+      <AppWrapper />
+    ),
+    {
+      exitOnCtrlC: false,
+      isScreenReaderEnabled: config.getScreenReader(),
+    },
+  );
 
   checkForUpdates()
     .then((info) => {
@@ -455,7 +465,7 @@ export async function main() {
     console.log('Session ID: %s', sessionId);
   }
 
-  await runNonInteractive(nonInteractiveConfig, input, prompt_id);
+  await runNonInteractive(nonInteractiveConfig, settings, input, prompt_id);
   // Call cleanup before process.exit, which causes cleanup to not run
   await runExitCleanup();
   process.exit(0);
